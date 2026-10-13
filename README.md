@@ -6,6 +6,9 @@ version your thesis and ask an AI to fix that compile error without leaving the 
 
 Works on Windows, macOS and Linux.
 
+<img width="2037" height="1193" alt="image" src="https://github.com/user-attachments/assets/5b68d5c8-b281-473e-a39b-c332efcba198" />
+
+
 ## What you get
 
 - Live PDF preview that recompiles a moment after you stop typing.
