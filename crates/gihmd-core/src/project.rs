@@ -1,0 +1,25 @@
+mod error;
+mod files;
+mod index;
+mod main_file;
+mod tree;
+
+pub use error::ProjectError;
+pub use files::FileStat;
+pub use files::create_dir;
+pub use files::create_file;
+pub use files::delete_path;
+pub use files::move_path;
+pub use files::read_text;
+pub use files::rename_path;
+pub use files::stat_path;
+pub use files::write_text;
+pub use index::ProjectIndex;
+pub use index::Symbol;
+pub use index::build_index;
+pub use main_file::MainFileDetection;
+pub use main_file::detect_main_file;
+pub use tree::FileNode;
+pub use tree::NodeKind;
+pub use tree::is_ignored_name;
+pub use tree::list_tree;

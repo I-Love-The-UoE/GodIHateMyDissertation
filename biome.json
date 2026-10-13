@@ -1,0 +1,183 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**", "!**/dist", "!**/src-tauri", "!**/node_modules", "!**/public", "!**/target"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "react": "recommended",
+      "project": "recommended",
+      "types": "recommended"
+    },
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "noUndeclaredDependencies": "error",
+        "useExhaustiveDependencies": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noConsole": "error",
+        "noTsIgnore": "error",
+        "noEmptyBlockStatements": "error"
+      },
+      "style": {
+        "useImportType": "error",
+        "useExportType": "error",
+        "noDefaultExport": "error",
+        "noNonNullAssertion": "error",
+        "noEnum": "error",
+        "noNamespace": "error",
+        "noParameterAssign": "error",
+        "useConst": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@tauri-apps/api": "Import from @/lib/tauri instead.",
+              "@tauri-apps/api/core": "Import from @/lib/tauri instead.",
+              "@tauri-apps/api/event": "Import from @/lib/tauri instead.",
+              "@tauri-apps/plugin-dialog": "Import from @/lib/tauri instead.",
+              "@tauri-apps/plugin-log": "Import from @/lib/log instead.",
+              "@tauri-apps/plugin-opener": "Import from @/lib/tauri instead.",
+              "@codemirror/state": "Import from @/lib/codemirror instead.",
+              "@codemirror/view": "Import from @/lib/codemirror instead.",
+              "@codemirror/language": "Import from @/lib/codemirror instead.",
+              "@codemirror/commands": "Import from @/lib/codemirror instead.",
+              "@codemirror/autocomplete": "Import from @/lib/codemirror instead.",
+              "@codemirror/lint": "Import from @/lib/codemirror instead.",
+              "@codemirror/search": "Import from @/lib/codemirror instead.",
+              "@codemirror/merge": "Import from @/lib/codemirror instead.",
+              "@codemirror/legacy-modes/mode/stex": "Import from @/lib/codemirror instead.",
+              "@lezer/highlight": "Import from @/lib/codemirror instead.",
+              "codemirror": "Import from @/lib/codemirror instead.",
+              "pdfjs-dist": "Import from @/lib/pdf instead.",
+              "yjs": "Import from @/lib/yjs instead.",
+              "y-codemirror.next": "Import from @/lib/codemirror instead.",
+              "y-protocols/awareness": "Import from @/lib/yjs instead.",
+              "@xterm/xterm": "Import from @/lib/xterm instead.",
+              "@xterm/addon-fit": "Import from @/lib/xterm instead.",
+              "@xterm/addon-web-links": "Import from @/lib/xterm instead."
+            }
+          }
+        }
+      },
+      "performance": {
+        "noBarrelFile": "error",
+        "noReExportAll": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 30
+          }
+        },
+        "useLiteralKeys": "off"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/lib/*/index.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/lib/tauri/**",
+        "src/lib/codemirror/**",
+        "src/lib/pdf/**",
+        "src/lib/yjs/**",
+        "src/lib/log.ts",
+        "src/lib/xterm/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/log.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.lazy.tsx", "vite.config.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/codemirror/completion.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noTemplateCurlyInString": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/app/main.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    }
+  ]
+}

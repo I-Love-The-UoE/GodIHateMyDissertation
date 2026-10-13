@@ -1,0 +1,38 @@
+pub mod claude;
+pub mod config;
+pub mod git;
+pub mod project;
+pub mod tex;
+
+mod context;
+mod paths;
+mod process;
+mod secrets;
+mod serialise;
+mod terminal;
+mod watch;
+
+pub use context::AppPaths;
+pub use context::Context;
+pub use paths::PathError;
+pub use paths::RelPath;
+pub use paths::normalise;
+pub use process::Captured;
+pub use process::CommandSpec;
+pub use process::ExitOutcome;
+pub use process::InteractiveChild;
+pub use process::ProcessError;
+pub use process::Processes;
+pub use secrets::Secrets;
+pub use secrets::SecretsError;
+pub use secrets::StoredCredential;
+pub use serialise::display;
+pub use terminal::TerminalError;
+pub use terminal::TerminalEvent;
+pub use terminal::TerminalSession;
+pub use terminal::TerminalSpec;
+pub use terminal::Terminals;
+pub use terminal::default_shell;
+pub use watch::FsEvent;
+pub use watch::WatchError;
+pub use watch::Watcher;

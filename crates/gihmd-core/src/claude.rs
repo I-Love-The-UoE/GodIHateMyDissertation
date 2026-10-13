@@ -1,0 +1,22 @@
+mod error;
+mod locate;
+mod protocol;
+mod session;
+
+pub use error::ClaudeError;
+pub use locate::locate_binary;
+pub use protocol::AssistantMessage;
+pub use protocol::ContentBlock;
+pub use protocol::ControlRequest;
+pub use protocol::Inbound;
+pub use protocol::Outbound;
+pub use protocol::PermissionDecision;
+pub use protocol::PermissionMode;
+pub use protocol::ResultMessage;
+pub use protocol::SystemMessage;
+pub use protocol::UserMessage;
+pub use protocol::decode;
+pub use protocol::encode;
+pub use session::ClaudeSession;
+pub use session::SessionConfig;
+pub use session::SessionEvent;

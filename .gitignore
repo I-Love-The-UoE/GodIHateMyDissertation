@@ -1,0 +1,7 @@
+/target/
+/node_modules/
+/dist/
+/public/pdfjs/
+/src-tauri/gen/schemas/
+*.log
+.DS_Store

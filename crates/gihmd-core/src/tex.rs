@@ -1,0 +1,24 @@
+mod compile;
+mod error;
+mod log;
+mod synctex;
+mod toolchain;
+
+pub use compile::CompileEvent;
+pub use compile::CompileOutcome;
+pub use compile::CompilePolicy;
+pub use compile::CompileRequest;
+pub use compile::CompileStatus;
+pub use compile::Compiler;
+pub use compile::build_dir_for;
+pub use compile::compile_dir;
+pub use error::TexError;
+pub use log::Diagnostic;
+pub use log::Severity;
+pub use log::parse_log;
+pub use synctex::ForwardHit;
+pub use synctex::InverseHit;
+pub use synctex::forward;
+pub use synctex::inverse;
+pub use toolchain::TexToolchain;
+pub use toolchain::resolve_toolchain;

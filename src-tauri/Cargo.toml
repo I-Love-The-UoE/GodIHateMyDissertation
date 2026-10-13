@@ -1,0 +1,40 @@
+[package]
+name = "gihmd"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "gihmd_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[lints]
+workspace = true
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+gihmd-core.workspace = true
+gihmd-git.workspace = true
+gihmd-process.workspace = true
+gihmd-pty.workspace = true
+gihmd-secrets.workspace = true
+gihmd-watch.workspace = true
+base64.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tauri.workspace = true
+tauri-plugin-dialog.workspace = true
+tauri-plugin-log.workspace = true
+tauri-plugin-opener.workspace = true
+tauri-plugin-window-state.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true

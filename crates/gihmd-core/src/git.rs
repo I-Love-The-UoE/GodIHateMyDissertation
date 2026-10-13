@@ -1,0 +1,25 @@
+mod error;
+mod model;
+mod operations;
+mod repository;
+
+pub use error::GitError;
+pub use model::AuthContext;
+pub use model::BranchInfo;
+pub use model::Change;
+pub use model::ChangedFile;
+pub use model::CommitInfo;
+pub use model::DiffKind;
+pub use model::FileDiff;
+pub use model::GitProgress;
+pub use model::LogQuery;
+pub use model::PullResult;
+pub use model::RemoteInfo;
+pub use model::RepoStatus;
+pub use model::StatusEntry;
+pub use operations::clone_repository;
+pub use operations::fetch;
+pub use operations::host_of;
+pub use operations::pull;
+pub use operations::push;
+pub use repository::Repository;
