@@ -17,3 +17,9 @@ thiserror.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
 tracing.workspace = true
+
+# NOTE: The universal macOS build compiles the Intel half on an Apple Silicon runner, where no
+# Intel OpenSSL exists for libssh2 to link; building OpenSSL from source for that target is the
+# only way to produce it. Linux links the system OpenSSL and Windows uses the native TLS stack.
+[target.'cfg(target_os = "macos")'.dependencies]
+git2 = { workspace = true, features = ["vendored-openssl"] }
