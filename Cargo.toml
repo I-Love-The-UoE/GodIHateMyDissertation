@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/gihmd-core",
+    "crates/gihmd-fetch",
     "crates/gihmd-git",
     "crates/gihmd-process",
     "crates/gihmd-pty",
@@ -11,7 +12,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.98"
 license = "MIT"
@@ -19,6 +20,7 @@ publish = false
 
 [workspace.dependencies]
 gihmd-core = { path = "crates/gihmd-core" }
+gihmd-fetch = { path = "crates/gihmd-fetch" }
 gihmd-git = { path = "crates/gihmd-git" }
 gihmd-process = { path = "crates/gihmd-process" }
 gihmd-pty = { path = "crates/gihmd-pty" }
@@ -35,6 +37,9 @@ notify = "8.2.0"
 notify-debouncer-full = "0.7.0"
 portable-pty = "0.9.0"
 regex = "1.13.1"
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls-no-provider", "stream", "http2", "charset", "system-proxy"] }
+# NOTE: `ring` ships prebuilt assembly, so Windows runners need no NASM; aws-lc-rs would.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 sha2 = "0.11.1"

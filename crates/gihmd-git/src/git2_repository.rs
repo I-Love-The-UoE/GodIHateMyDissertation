@@ -11,6 +11,7 @@ use gihmd_core::git::DiffKind;
 use gihmd_core::git::FileDiff;
 use gihmd_core::git::GitError;
 use gihmd_core::git::GitProgress;
+use gihmd_core::git::Identity;
 use gihmd_core::git::LogQuery;
 use gihmd_core::git::PullResult;
 use gihmd_core::git::RemoteInfo;
@@ -48,6 +49,20 @@ where
 }
 
 impl Repository for Git2Repository {
+    async fn identity(&self) -> Result<Option<Identity>, GitError> {
+        blocking(|| {
+            let config =
+                git2::Config::open_default().map_err(|error| crate::convert::lib_error(&error))?;
+            let name = config.get_string("user.name").ok();
+            let email = config.get_string("user.email").ok();
+
+            Ok(name
+                .zip(email)
+                .map(|(name, email)| Identity { name, email }))
+        })
+        .await
+    }
+
     async fn open_or_none(&self, root: &Path) -> Result<Option<RepoStatus>, GitError> {
         let root = root.to_path_buf();
 

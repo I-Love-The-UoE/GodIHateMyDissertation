@@ -18,6 +18,26 @@ export type TexToolchain = {
 
 export type ClaudeProbe = { readonly path: string; readonly version: string };
 
+export type ManagedTexStatus = {
+  readonly root: string;
+  readonly installed: boolean;
+  readonly binDir: string | null;
+  readonly perlAvailable: boolean;
+  readonly customDir: string | null;
+};
+
+export type TexInstallEvent =
+  | { readonly phase: "downloading"; readonly received: number; readonly total: number | null }
+  | { readonly phase: "extracting" }
+  | { readonly phase: "installing"; readonly line: string }
+  | { readonly phase: "packages"; readonly names: readonly string[] }
+  | { readonly phase: "package_line"; readonly line: string }
+  | { readonly phase: "packages_installed"; readonly names: readonly string[] }
+  | { readonly phase: "finished"; readonly binDir: string }
+  | { readonly phase: "failed"; readonly error: string };
+
+export type GitIdentity = { readonly name: string; readonly email: string };
+
 export type ProjectRecord = {
   readonly id: string;
   readonly root: string;
@@ -57,6 +77,9 @@ export type ProjectIndex = {
   readonly environments: readonly Symbol[];
   readonly texFiles: readonly string[];
   readonly bibFiles: readonly string[];
+  readonly packages: readonly string[];
+  readonly classes: readonly string[];
+  readonly localStyles: readonly string[];
 };
 
 export type FileStat = { readonly mtimeMs: number; readonly size: number };

@@ -9,7 +9,6 @@ use gihmd_core::TerminalSpec;
 use gihmd_core::Terminals;
 use gihmd_core::default_shell;
 use gihmd_core::tex::compile_dir;
-use gihmd_core::tex::resolve_toolchain;
 use serde::Serialize;
 use tauri::AppHandle;
 use tauri::Manager;
@@ -40,9 +39,9 @@ pub async fn terminal_open(
         || record.root.clone(),
         |main| compile_dir(&record.root, main),
     );
-    let explicit = state.settings()?.tex_bin_dir.clone();
     // NOTE: A TeX distribution that cannot be found is not an error for the terminal itself.
-    let path_prepend = resolve_toolchain(explicit.as_deref())
+    let path_prepend = state
+        .resolve_toolchain()
         .map(|toolchain| vec![toolchain.bin_dir])
         .unwrap_or_default();
     let id = {

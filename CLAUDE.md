@@ -29,6 +29,17 @@ Requires a system TeX distribution with `latexmk` and `synctex`, and the Claude 
 (or set in Settings). Builds go to the app cache dir (`$APPCACHE/builds/<hash>/`), never into the
 project.
 
+## Managed TeX Live
+
+`gihmd-core::tex::ManagedTexLive` owns a TeX Live under the app data dir (`texlive/`): it downloads
+the official `install-tl`, runs it unattended with `scheme-basic` plus the packages in
+`BASE_PACKAGES`, and installs further packages with `tlmgr` (verified against the local database
+and retried on texlive.info because `tlmgr` exits 0 on a corrupt mirror download). Before each
+compile the project's `\usepackage`/`\documentclass` names are checked with `kpsewhich` and the
+missing ones installed in one batch; a compile that still fails on a missing file triggers a
+`tlmgr search --file` lookup and a recompile, each file at most once per session. A custom TeX
+directory in settings bypasses all of this. No PATH probing anywhere.
+
 ## Multiplayer seam
 
 Every open file is a Yjs `Y.Doc` bound to CodeMirror through `y-codemirror.next`. The only

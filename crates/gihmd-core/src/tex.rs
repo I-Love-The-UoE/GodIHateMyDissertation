@@ -1,6 +1,7 @@
 mod compile;
 mod error;
 mod log;
+mod managed;
 mod synctex;
 mod toolchain;
 
@@ -16,6 +17,10 @@ pub use error::TexError;
 pub use log::Diagnostic;
 pub use log::Severity;
 pub use log::parse_log;
+pub use managed::BASE_PACKAGES;
+pub use managed::ManagedTexLive;
+pub use managed::TexInstallEvent;
+pub use managed::missing_files;
 pub use synctex::ForwardHit;
 pub use synctex::InverseHit;
 pub use synctex::forward;

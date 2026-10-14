@@ -11,6 +11,7 @@ import {
   onFsChanged,
   onGitChanged,
   onGitProgress,
+  onTexInstall,
 } from "@/lib/tauri";
 import { isLocalProvider } from "@/lib/yjs";
 import { useServices, useStore } from "./services";
@@ -51,6 +52,7 @@ function useBackendEvents(): void {
       onGitProgress((payload) => store.getState().handleGitProgress(payload)),
       onGitChanged(() => spawn(store.getState().refreshGit())),
       onClaudeEvent((event) => store.getState().handleClaudeEvent(event)),
+      onTexInstall((event) => store.getState().handleTexInstall(event)),
     ];
 
     return () => {

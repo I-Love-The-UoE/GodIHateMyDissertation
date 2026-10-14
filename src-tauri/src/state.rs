@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -15,7 +16,11 @@ use gihmd_core::config::ProjectRecord;
 use gihmd_core::config::ProjectRegistry;
 use gihmd_core::tex::CompileEvent;
 use gihmd_core::tex::CompileOutcome;
+use gihmd_core::tex::CompileRequest;
 use gihmd_core::tex::Compiler;
+use gihmd_core::tex::ManagedTexLive;
+use gihmd_core::tex::TexInstallEvent;
+use gihmd_core::tex::missing_files;
 use gihmd_process::TokioProcesses;
 use gihmd_pty::PtySession;
 use gihmd_watch::WatchHandle;
@@ -54,6 +59,10 @@ pub struct AppState {
     pub compile_forwarder: Mutex<Option<JoinHandle<()>>>,
     pub terminals: Mutex<HashMap<u64, Arc<PtySession>>>,
     pub next_terminal_id: Mutex<u64>,
+    pub managed_tex: ManagedTexLive,
+    pub tex_install: Mutex<Option<JoinHandle<()>>>,
+    pub last_request: Mutex<Option<CompileRequest>>,
+    pub attempted_files: Mutex<HashSet<String>>,
 }
 
 impl AppState {
@@ -147,13 +156,18 @@ impl AppState {
             return Ok(());
         }
 
-        let explicit = self.settings()?.tex_bin_dir.clone();
-        let toolchain = gihmd_core::tex::resolve_toolchain(explicit.as_deref())?;
+        let toolchain = self.resolve_toolchain()?;
         let (sender, mut receiver) = mpsc::channel::<CompileEvent>(EVENT_QUEUE);
         let handle = app.clone();
         let forwarder = tokio::spawn(async move {
             while let Some(event) = receiver.recv().await {
                 if let CompileEvent::Finished { outcome } = &event {
+                    let state = handle.state::<AppState>();
+
+                    if let Err(error) = state.auto_install_packages(&handle, outcome) {
+                        tracing::warn!(error = %error, "Automatic package installation could not start.");
+                    }
+
                     tracing::info!(
                         job_id = outcome.job_id,
                         status = ?outcome.status,
@@ -177,6 +191,99 @@ impl AppState {
             sender,
         ));
         *Self::lock(&self.compile_forwarder)? = Some(forwarder);
+
+        Ok(())
+    }
+
+    pub fn resolve_toolchain(&self) -> Result<gihmd_core::tex::TexToolchain, AppError> {
+        let explicit = self.settings()?.tex_bin_dir.clone();
+
+        Ok(gihmd_core::tex::resolve_toolchain(
+            explicit.as_deref(),
+            self.managed_tex.bin_dir(),
+            self.managed_tex.root(),
+        )?)
+    }
+
+    pub fn tex_install_sender(app: &AppHandle) -> mpsc::Sender<TexInstallEvent> {
+        let (sender, mut receiver) = mpsc::channel::<TexInstallEvent>(EVENT_QUEUE);
+        let handle = app.clone();
+        drop(tokio::spawn(async move {
+            while let Some(event) = receiver.recv().await {
+                events::emit(&handle, events::TEX_INSTALL, event);
+            }
+        }));
+
+        sender
+    }
+
+    /// With the managed TeX Live active, a compile that failed on files no installed package
+    /// provides triggers a `tlmgr` lookup and install, then a recompile. Each file is tried once
+    /// per project session so an unknown file cannot loop.
+    pub fn auto_install_packages(
+        &self,
+        app: &AppHandle,
+        outcome: &CompileOutcome,
+    ) -> Result<(), AppError> {
+        if self.settings()?.tex_bin_dir.is_some() || self.managed_tex.bin_dir().is_none() {
+            return Ok(());
+        }
+
+        let files: Vec<String> = {
+            let mut attempted = Self::lock(&self.attempted_files)?;
+
+            missing_files(&outcome.diagnostics)
+                .into_iter()
+                .filter(|file| attempted.insert(file.clone()))
+                .collect()
+        };
+
+        if files.is_empty() {
+            return Ok(());
+        }
+
+        let Some(request) = Self::lock(&self.last_request)?.clone() else {
+            return Ok(());
+        };
+        let handle = app.clone();
+        drop(tokio::spawn(async move {
+            let state = handle.state::<AppState>();
+            let events = Self::tex_install_sender(&handle);
+            let context = Arc::clone(&state.context);
+
+            match state
+                .managed_tex
+                .ensure_files(context.as_ref(), &files, &events)
+                .await
+            {
+                Ok(unresolved) if unresolved.is_empty() => {
+                    let compiler = state.compiler.lock().ok();
+
+                    if let Some(compiler) = compiler.as_ref().and_then(|guard| guard.as_ref()) {
+                        compiler.request(CompileRequest {
+                            policy: gihmd_core::tex::CompilePolicy::Queue,
+                            ..request
+                        });
+                    }
+                }
+                Ok(unresolved) => {
+                    let error =
+                        gihmd_core::tex::TexError::PackagesUnavailable { files: unresolved };
+                    let _ = events
+                        .send(TexInstallEvent::Failed {
+                            error: error.to_string(),
+                        })
+                        .await;
+                }
+                Err(error) => {
+                    let _ = events
+                        .send(TexInstallEvent::Failed {
+                            error: error.to_string(),
+                        })
+                        .await;
+                }
+            }
+        }));
 
         Ok(())
     }
@@ -253,6 +360,7 @@ pub fn initialise(app: &tauri::App) -> Result<(), StartupError> {
     let config = config::load(app)?;
     install_tracing(&config.log_dir)?;
     tracing::info!("Configuration loaded.");
+    let data_dir = config.paths.data_dir.clone();
     let context = Arc::new(AppContext::new(config.paths, config.settings));
     app.manage(AppState {
         context,
@@ -266,6 +374,10 @@ pub fn initialise(app: &tauri::App) -> Result<(), StartupError> {
         compile_forwarder: Mutex::new(None),
         terminals: Mutex::new(HashMap::new()),
         next_terminal_id: Mutex::new(0),
+        managed_tex: ManagedTexLive::new(&data_dir),
+        tex_install: Mutex::new(None),
+        last_request: Mutex::new(None),
+        attempted_files: Mutex::new(HashSet::new()),
     });
 
     Ok(())

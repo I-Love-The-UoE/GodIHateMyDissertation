@@ -36,6 +36,8 @@ pub enum AppError {
     Process(#[from] gihmd_core::ProcessError),
     #[error(transparent)]
     Terminal(#[from] gihmd_core::TerminalError),
+    #[error(transparent)]
+    Download(#[from] gihmd_core::DownloadError),
     #[error("No project is open.")]
     NoProject { kind: NoProjectKind },
     #[error("The application state is poisoned.")]

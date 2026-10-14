@@ -136,6 +136,13 @@ pub enum PullResult {
     FastForwarded { from: String, to: String },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Identity {
+    pub name: String,
+    pub email: String,
+}
+
 /// Credentials resolved before a network operation starts; the credential callback inside the git
 /// wrapper is synchronous and must not touch the keychain itself.
 #[derive(Debug, Clone, Default)]

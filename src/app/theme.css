@@ -851,3 +851,29 @@ select:focus {
 .terminal-host .xterm {
   height: 100%;
 }
+
+.setup-warnings {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setup-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--warn);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--bg-1);
+}
+
+.setup-warning-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}

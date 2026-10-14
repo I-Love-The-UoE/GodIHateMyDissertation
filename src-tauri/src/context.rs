@@ -3,6 +3,7 @@ use std::sync::RwLock;
 use gihmd_core::AppPaths;
 use gihmd_core::Context;
 use gihmd_core::config::AppSettings;
+use gihmd_fetch::ReqwestDownloads;
 use gihmd_git::Git2Repository;
 use gihmd_process::TokioProcesses;
 use gihmd_pty::PortableTerminals;
@@ -18,6 +19,7 @@ pub struct AppContext {
     processes: std::sync::Arc<TokioProcesses>,
     watcher: NotifyWatcher,
     terminals: PortableTerminals,
+    downloads: ReqwestDownloads,
 }
 
 impl AppContext {
@@ -30,6 +32,7 @@ impl AppContext {
             processes: std::sync::Arc::new(gihmd_process::default()),
             watcher: gihmd_watch::default(),
             terminals: gihmd_pty::default(),
+            downloads: gihmd_fetch::default(),
         }
     }
 
@@ -44,6 +47,7 @@ impl Context for AppContext {
     type Processes = TokioProcesses;
     type Watcher = NotifyWatcher;
     type Terminals = PortableTerminals;
+    type Downloads = ReqwestDownloads;
 
     fn paths(&self) -> &AppPaths {
         &self.paths
@@ -71,5 +75,9 @@ impl Context for AppContext {
 
     fn terminals(&self) -> &Self::Terminals {
         &self.terminals
+    }
+
+    fn downloads(&self) -> &Self::Downloads {
+        &self.downloads
     }
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { spawn } from "@/lib/async";
 import { pickDirectory } from "@/lib/tauri";
+import { SetupWarnings } from "./setup-warnings";
 
 function CloneDialog(props: { readonly open: boolean; readonly onClose: () => void }): ReactNode {
   const { open, onClose } = props;
@@ -120,6 +121,7 @@ export function StartScreen(): ReactNode {
       <h1>
         God<span>I</span>Hate<span>My</span>Dissertation
       </h1>
+      <SetupWarnings />
       <div className="actions">
         <Button variant="primary" onClick={() => spawn(pickAndOpen())}>
           Open folder

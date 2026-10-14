@@ -12,6 +12,7 @@ pub use model::CommitInfo;
 pub use model::DiffKind;
 pub use model::FileDiff;
 pub use model::GitProgress;
+pub use model::Identity;
 pub use model::LogQuery;
 pub use model::PullResult;
 pub use model::RemoteInfo;

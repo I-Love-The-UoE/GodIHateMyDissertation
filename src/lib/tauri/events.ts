@@ -2,7 +2,13 @@ import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import { spawn } from "@/lib/async";
 import type { SessionEvent } from "./claude-protocol";
-import type { CompileEvent, FsEvent, GitProgressPayload, TerminalEventPayload } from "./types";
+import type {
+  CompileEvent,
+  FsEvent,
+  GitProgressPayload,
+  TerminalEventPayload,
+  TexInstallEvent,
+} from "./types";
 
 export type Unsubscribe = () => void;
 
@@ -39,6 +45,10 @@ export function onGitProgress(handler: (payload: GitProgressPayload) => void): U
 
 export function onGitChanged(handler: () => void): Unsubscribe {
   return subscribe<null>("git://changed", () => handler());
+}
+
+export function onTexInstall(handler: (event: TexInstallEvent) => void): Unsubscribe {
+  return subscribe("tex://install", handler);
 }
 
 export function onTerminalEvent(handler: (payload: TerminalEventPayload) => void): Unsubscribe {

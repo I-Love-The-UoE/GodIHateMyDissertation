@@ -1,13 +1,14 @@
 use gihmd_core::Context;
 use gihmd_core::RelPath;
+use gihmd_core::project::build_index;
 use gihmd_core::tex::CompileOutcome;
 use gihmd_core::tex::CompilePolicy;
 use gihmd_core::tex::CompileRequest;
 use gihmd_core::tex::ForwardHit;
 use gihmd_core::tex::InverseHit;
 use gihmd_core::tex::TexError;
-use gihmd_core::tex::TexToolchain;
 use gihmd_core::tex::build_dir_for;
+use gihmd_core::tex::compile_dir;
 use tauri::AppHandle;
 use tauri::State;
 
@@ -36,6 +37,8 @@ pub async fn tex_compile(
         shell_escape,
         policy,
     };
+    *AppState::lock(&state.last_request)? = Some(request.clone());
+    preinstall_packages(&app, &state, &request).await;
     let compiler = AppState::lock(&state.compiler)?;
     let job_id = compiler
         .as_ref()
@@ -51,12 +54,6 @@ pub async fn tex_cancel(state: State<'_, AppState>) -> Result<(), AppError> {
     }
 
     Ok(())
-}
-
-fn toolchain(state: &AppState) -> Result<TexToolchain, AppError> {
-    let explicit = state.settings()?.tex_bin_dir.clone();
-
-    Ok(gihmd_core::tex::resolve_toolchain(explicit.as_deref())?)
 }
 
 fn latest_pdf(state: &AppState) -> Result<std::path::PathBuf, AppError> {
@@ -76,10 +73,10 @@ pub async fn tex_synctex_forward(
     column: u32,
 ) -> Result<Vec<ForwardHit>, AppError> {
     let record = state.current_record()?;
-    let toolchain = toolchain(&state)?;
+    let toolchain = state.resolve_toolchain()?;
     let pdf = latest_pdf(&state)?;
     let main_file = record.main_file.ok_or(TexError::MainFileMissing)?;
-    let compile_dir = gihmd_core::tex::compile_dir(&record.root, &main_file);
+    let compile_dir = compile_dir(&record.root, &main_file);
     let absolute = file.join(&record.root);
     let hits = gihmd_core::tex::forward(
         state.context.processes(),
@@ -103,10 +100,10 @@ pub async fn tex_synctex_inverse(
     y: f64,
 ) -> Result<Vec<InverseHit>, AppError> {
     let record = state.current_record()?;
-    let toolchain = toolchain(&state)?;
+    let toolchain = state.resolve_toolchain()?;
     let pdf = latest_pdf(&state)?;
     let main_file = record.main_file.ok_or(TexError::MainFileMissing)?;
-    let compile_dir = gihmd_core::tex::compile_dir(&record.root, &main_file);
+    let compile_dir = compile_dir(&record.root, &main_file);
     let hits = gihmd_core::tex::inverse(
         state.context.processes(),
         &toolchain,
@@ -148,4 +145,43 @@ pub async fn tex_latest_outcome(
     let latest = AppState::lock(&state.latest_outcome)?.clone();
 
     Ok(latest)
+}
+
+/// With the managed TeX Live, install every package the project names before the first compile
+/// so a fresh template needs one round instead of one per missing file. Failures only log: the
+/// compile itself reports what is still missing.
+async fn preinstall_packages(app: &AppHandle, state: &AppState, request: &CompileRequest) {
+    let managed = state
+        .settings()
+        .is_ok_and(|settings| settings.tex_bin_dir.is_none())
+        && state.managed_tex.bin_dir().is_some();
+
+    if !managed {
+        return;
+    }
+
+    let Ok(index) = build_index(&request.project_root).await else {
+        return;
+    };
+    let files: Vec<String> = index
+        .packages
+        .iter()
+        .map(|name| format!("{name}.sty"))
+        .chain(index.classes.iter().map(|name| format!("{name}.cls")))
+        .filter(|file| !index.local_styles.contains(file))
+        .collect();
+    let events = AppState::tex_install_sender(app);
+
+    match state
+        .managed_tex
+        .ensure_files(state.context.as_ref(), &files, &events)
+        .await
+    {
+        Ok(unresolved) => {
+            if let Ok(mut attempted) = state.attempted_files.lock() {
+                attempted.extend(unresolved);
+            }
+        }
+        Err(error) => tracing::warn!(error = %error, "Pre-installing packages failed."),
+    }
 }

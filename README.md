@@ -24,16 +24,13 @@ Works on Windows, macOS and Linux.
 
 ## Before you start
 
-You need two things installed:
+Nothing to install for LaTeX itself. On first launch the app offers to install its own TeX Live
+(about 400 MB) into its data folder, and from then on it fetches any package a document needs on
+its own. If you already have TeX Live or MiKTeX and prefer it, point the app at it in Settings.
 
-1. **A TeX distribution** with `latexmk`: [TeX Live](https://tug.org/texlive/) (Windows, macOS
-   via MacTeX, Linux) or [MiKTeX](https://miktex.org/) (Windows).
-2. **Claude Code** if you want the AI panel: follow the
-   [official install guide](https://code.claude.com/docs/en/quickstart) and sign in once with
-   `claude`.
-
-If the app cannot find TeX or Claude, the settings dialog (gear icon, bottom right) lets you point
-it at the right folder.
+For the Claude panel you need **Claude Code**: follow the
+[official install guide](https://code.claude.com/docs/en/quickstart) and sign in once with
+`claude`. Everything else works without it.
 
 ## First steps
 

@@ -16,9 +16,11 @@ import type {
   FileNode,
   FileStat,
   ForwardHit,
+  GitIdentity,
   InverseHit,
   LogQuery,
   MainFileDetection,
+  ManagedTexStatus,
   OpenedProject,
   PermissionDecision,
   PermissionMode,
@@ -52,6 +54,9 @@ export type Backend = {
   readonly settingsSet: (settings: AppSettings) => Call<AppSettings>;
   readonly texProbeToolchain: (explicit: string | null) => Call<TexToolchain>;
   readonly claudeProbeBinary: (explicit: string | null) => Call<ClaudeProbe>;
+  readonly texManagedStatus: () => Call<ManagedTexStatus>;
+  readonly texInstallManaged: () => Call<void>;
+  readonly gitIdentity: () => Call<GitIdentity | null>;
   readonly projectRecent: () => Call<ProjectRecord[]>;
   readonly projectOpen: (root: string) => Call<OpenedProject>;
   readonly projectCreate: (root: string) => Call<OpenedProject>;
@@ -131,6 +136,9 @@ export function createBackend(): Backend {
     settingsSet: (settings) => call("settings_set", { settings }),
     texProbeToolchain: (explicit) => call("tex_probe_toolchain", { explicit }),
     claudeProbeBinary: (explicit) => call("claude_probe_binary", { explicit }),
+    texManagedStatus: () => call("tex_managed_status"),
+    texInstallManaged: () => call("tex_install_managed"),
+    gitIdentity: () => call("git_identity"),
     projectRecent: () => call("project_recent"),
     projectOpen: (root) => call("project_open", { root }),
     projectCreate: (root) => call("project_create", { root }),

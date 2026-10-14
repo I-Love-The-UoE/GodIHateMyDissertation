@@ -15,7 +15,7 @@ import { LogPanel } from "@/features/problems/log-panel";
 import { ProblemsPanel } from "@/features/problems/problems-panel";
 import { TerminalPanel } from "@/features/terminal/terminal-panel";
 import { debounced, spawn } from "@/lib/async";
-import type { ForwardHit } from "@/lib/tauri";
+import type { ForwardHit, TexInstallEvent } from "@/lib/tauri";
 
 function useCompileOrchestration(): {
   readonly save: () => void;
@@ -101,6 +101,14 @@ function useCompileOrchestration(): {
   return { save, compileNow, forwardSearch, forwardHits, forwardNonce };
 }
 
+function compileLabel(state: string, install: TexInstallEvent | undefined): string {
+  if (install !== undefined && (install.phase === "packages" || install.phase === "package_line")) {
+    return "installing packages…";
+  }
+
+  return state === "running" ? "compiling…" : state;
+}
+
 function compileDot(state: string): string {
   switch (state) {
     case "running":
@@ -130,6 +138,7 @@ export function Workspace(): ReactNode {
   const repo = useStore((state) => state.repo);
   const cursor = useStore((state) => state.cursor);
   const texProbe = useStore((state) => state.texProbe);
+  const texInstall = useStore((state) => state.texInstall);
   const setSettingsOpen = useStore((state) => state.setSettingsOpen);
   const closeProject = useStore((state) => state.closeProject);
   const cancelCompile = useStore((state) => state.cancelCompile);
@@ -285,7 +294,7 @@ export function Workspace(): ReactNode {
             content: (
               <>
                 <span className={`dot ${compileDot(compileState)}`} />
-                <span>{compileState === "running" ? "compiling…" : compileState}</span>
+                <span>{compileLabel(compileState, texInstall)}</span>
               </>
             ),
             onClick: () => setBottomTab("problems"),

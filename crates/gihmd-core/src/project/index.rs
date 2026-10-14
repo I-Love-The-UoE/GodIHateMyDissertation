@@ -20,6 +20,12 @@ static NEW_ENVIRONMENT: LazyLock<Regex> = LazyLock::new(|| {
 });
 static BIB_ENTRY: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"@[A-Za-z]+\s*\{\s*([^,\s]+)\s*,").unwrap_or_else(|_| never()));
+static USE_PACKAGE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"\\(?P<command>usepackage|RequirePackage|documentclass|LoadClass)\s*(?:\[[^\]]*\])?\s*\{(?P<names>[^}]+)\}",
+    )
+    .unwrap_or_else(|_| never())
+});
 static COMMENT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(^|[^\\])%.*$").unwrap_or_else(|_| never()));
 
@@ -48,6 +54,12 @@ pub struct ProjectIndex {
     pub environments: Vec<Symbol>,
     pub tex_files: Vec<RelPath>,
     pub bib_files: Vec<RelPath>,
+    /// Names from `\usepackage` and `\RequirePackage`, as written, in first-seen order.
+    pub packages: Vec<String>,
+    /// Names from `\documentclass` and `\LoadClass`.
+    pub classes: Vec<String>,
+    /// File names of `.sty` and `.cls` files that live inside the project.
+    pub local_styles: Vec<String>,
 }
 
 fn collect_files(node: &FileNode, into: &mut Vec<RelPath>) {
@@ -94,6 +106,28 @@ fn scan_tex(text: &str, file: &RelPath, index: &mut ProjectIndex) {
             }
         }
 
+        for capture in USE_PACKAGE.captures_iter(&line) {
+            let Some(names) = capture.name("names") else {
+                continue;
+            };
+            let is_class = capture
+                .name("command")
+                .is_some_and(|m| m.as_str() == "documentclass" || m.as_str() == "LoadClass");
+            let target = if is_class {
+                &mut index.classes
+            } else {
+                &mut index.packages
+            };
+
+            for name in names.as_str().split(',') {
+                let name = name.trim().to_owned();
+
+                if !name.is_empty() && !target.contains(&name) {
+                    target.push(name);
+                }
+            }
+        }
+
         for capture in NEW_ENVIRONMENT.captures_iter(&line) {
             if let Some(name) = capture.get(1) {
                 index.environments.push(Symbol {
@@ -132,6 +166,10 @@ pub async fn build_index(root: &Path) -> Result<ProjectIndex, ProjectError> {
         let Ok(text) = tokio::fs::read_to_string(file.join(root)).await else {
             continue;
         };
+
+        if matches!(file.extension(), Some("sty" | "cls")) {
+            index.local_styles.push(file.file_name().to_owned());
+        }
 
         if file.extension() == Some("bib") {
             scan_bib(&text, &file, &mut index);

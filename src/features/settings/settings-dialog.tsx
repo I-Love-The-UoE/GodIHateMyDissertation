@@ -56,7 +56,7 @@ export function SettingsDialog(): ReactNode {
     >
       <div className="settings-grid">
         <div className="field">
-          <label htmlFor="tex-bin">TeX binary directory (blank = auto-detect)</label>
+          <label htmlFor="tex-bin">Custom TeX directory (blank = use the managed TeX Live)</label>
           <input
             id="tex-bin"
             value={draft.texBinDir ?? ""}

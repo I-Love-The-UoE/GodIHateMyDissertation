@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::RwLock;
 
 use crate::config::AppSettings;
+use crate::download::Downloads;
 use crate::git::Repository;
 use crate::process::Processes;
 use crate::secrets::Secrets;
@@ -12,6 +13,7 @@ use crate::watch::Watcher;
 pub struct AppPaths {
     pub config_dir: PathBuf,
     pub cache_dir: PathBuf,
+    pub data_dir: PathBuf,
 }
 
 pub trait Context: Send + Sync + 'static {
@@ -20,6 +22,7 @@ pub trait Context: Send + Sync + 'static {
     type Processes: Processes;
     type Watcher: Watcher;
     type Terminals: Terminals;
+    type Downloads: Downloads;
 
     fn paths(&self) -> &AppPaths;
     fn settings(&self) -> &RwLock<AppSettings>;
@@ -28,4 +31,5 @@ pub trait Context: Send + Sync + 'static {
     fn processes(&self) -> &Self::Processes;
     fn watcher(&self) -> &Self::Watcher;
     fn terminals(&self) -> &Self::Terminals;
+    fn downloads(&self) -> &Self::Downloads;
 }

@@ -20,6 +20,7 @@ export {
   onGitChanged,
   onGitProgress,
   onTerminalEvent,
+  onTexInstall,
 } from "./events";
 export { assetUrl, browse, pickDirectory, revealPath } from "./shell";
 export type {
@@ -43,11 +44,13 @@ export type {
   FileStat,
   ForwardHit,
   FsEvent,
+  GitIdentity,
   GitProgress,
   GitProgressPayload,
   InverseHit,
   LogQuery,
   MainFileDetection,
+  ManagedTexStatus,
   NodeKind,
   OpenedProject,
   PermissionDecision,
@@ -62,6 +65,7 @@ export type {
   StatusEntry,
   Symbol,
   TerminalEventPayload,
+  TexInstallEvent,
   TexToolchain,
   WireError,
 } from "./types";

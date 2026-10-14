@@ -5,6 +5,7 @@ pub mod project;
 pub mod tex;
 
 mod context;
+mod download;
 mod paths;
 mod process;
 mod secrets;
@@ -14,6 +15,9 @@ mod watch;
 
 pub use context::AppPaths;
 pub use context::Context;
+pub use download::DownloadError;
+pub use download::DownloadProgress;
+pub use download::Downloads;
 pub use paths::PathError;
 pub use paths::RelPath;
 pub use paths::normalise;

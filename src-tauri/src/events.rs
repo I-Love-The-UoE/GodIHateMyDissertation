@@ -8,6 +8,7 @@ pub const GIT_PROGRESS: &str = "git://progress";
 pub const GIT_CHANGED: &str = "git://changed";
 pub const CLAUDE_EVENT: &str = "claude://event";
 pub const TERMINAL_EVENT: &str = "terminal://event";
+pub const TEX_INSTALL: &str = "tex://install";
 
 pub fn emit<T: Serialize + Clone>(app: &AppHandle, name: &str, payload: T) {
     if let Err(error) = app.emit(name, payload) {

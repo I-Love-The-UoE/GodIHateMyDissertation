@@ -12,6 +12,7 @@ use crate::git::DiffKind;
 use crate::git::FileDiff;
 use crate::git::GitError;
 use crate::git::GitProgress;
+use crate::git::Identity;
 use crate::git::LogQuery;
 use crate::git::PullResult;
 use crate::git::RemoteInfo;
@@ -19,6 +20,9 @@ use crate::git::RepoStatus;
 use crate::paths::RelPath;
 
 pub trait Repository: Send + Sync + 'static {
+    /// The author identity git would use for commits, from the global configuration.
+    fn identity(&self) -> impl Future<Output = Result<Option<Identity>, GitError>> + Send;
+
     fn open_or_none(
         &self,
         root: &Path,

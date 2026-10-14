@@ -21,6 +21,7 @@ pub fn load(app: &tauri::App) -> Result<Config, StartupError> {
     let resolver = app.path();
     let config_dir = resolver.app_config_dir()?;
     let cache_dir = resolver.app_cache_dir()?;
+    let data_dir = resolver.app_data_dir()?;
     let log_dir = resolver.app_log_dir()?;
     let settings = tauri::async_runtime::block_on(load_settings(&config_dir))?;
     let projects = tauri::async_runtime::block_on(ProjectRegistry::load(&config_dir))?;
@@ -29,6 +30,7 @@ pub fn load(app: &tauri::App) -> Result<Config, StartupError> {
         paths: AppPaths {
             config_dir,
             cache_dir,
+            data_dir,
         },
         log_dir,
         settings,
